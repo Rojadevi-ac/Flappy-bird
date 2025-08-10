@@ -56,16 +56,30 @@ window.onload = function () {
 
     // controls
     document.addEventListener("keydown", moveBird);
-    document.addEventListener("touchstart", () => velocityY = -6);
-    document.addEventListener("mousedown", () => velocityY = -6); // NEW click to jump
+    document.addEventListener("touchstart", handleJump);
+    document.addEventListener("mousedown", handleJump);
 
-    // responsive scaling for laptop & mobile
+    // responsive scaling
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
     // hide address bar on mobile
     setTimeout(() => window.scrollTo(0, 1), 0);
 };
+
+// shared jump/reset function
+function handleJump() {
+    velocityY = -6;
+
+    // reset game if over
+    if (gameOver) {
+        bird.y = birdY;
+        pipeArray = [];
+        score = 0;
+        gameOver = false;
+        velocityY = -6; // give an initial boost after reset
+    }
+}
 
 function update() {
     requestAnimationFrame(update);
@@ -120,16 +134,7 @@ function placePipes() {
 
 function moveBird(e) {
     if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyX") {
-        // jump
-        velocityY = -6;
-
-        // reset game
-        if (gameOver) {
-            bird.y = birdY;
-            pipeArray = [];
-            score = 0;
-            gameOver = false;
-        }
+        handleJump();
     }
 }
 
@@ -140,7 +145,6 @@ function detectCollision(a, b) {
         a.y + a.height > b.y;
 }
 
-// keeps correct aspect ratio for both mobile & desktop
 function resizeCanvas() {
     let scale = Math.min(window.innerWidth / boardWidth, window.innerHeight / boardHeight);
     board.style.transform = `scale(${scale})`;
